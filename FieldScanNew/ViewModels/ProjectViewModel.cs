@@ -1,6 +1,7 @@
 ﻿using FieldScanNew.Infrastructure;
 using FieldScanNew.Models;
 using System.Collections.ObjectModel;
+using System.Windows.Input; // 需要引用 ICommand
 
 namespace FieldScanNew.ViewModels
 {
@@ -20,29 +21,40 @@ namespace FieldScanNew.ViewModels
                 if (_isSelected == value) return;
                 _isSelected = value;
                 OnPropertyChanged();
-
                 if (_isSelected && ParentMainViewModel != null)
                 {
-                    // **健壮性修正**: 确保在调用前 ParentMainViewModel 是存在的
                     ParentMainViewModel.LoadProjectDataIntoViewModel(this);
                 }
             }
         }
 
-        // **健壮性修正**: 将 ParentMainViewModel 移到构造函数中，确保它在创建时就被赋值
         private MainViewModel ParentMainViewModel { get; }
+
+        // **新增**：用于添加新测量项的命令
+        public ICommand AddNewMeasurementCommand { get; }
 
         public ProjectViewModel(string name, string folderPath, MainViewModel parent)
         {
             DisplayName = name;
             ProjectFolderPath = folderPath;
-            ParentMainViewModel = parent; // 强制关联父级
+            ParentMainViewModel = parent;
             ProjectData = new ProjectData { ProjectName = name };
 
-            Measurements = new ObservableCollection<MeasurementViewModel>
-            {
-                new MeasurementViewModel("NearField_N9322C_3")
-            };
+            // **核心改动**：初始化一个空的测量项列表
+            Measurements = new ObservableCollection<MeasurementViewModel>();
+
+            // 初始化命令，并指定要执行的方法
+            AddNewMeasurementCommand = new RelayCommand(ExecuteAddNewMeasurement);
+        }
+
+        /// <summary>
+        /// 执行添加新测量项的逻辑
+        /// </summary>
+        private void ExecuteAddNewMeasurement(object? parameter)
+        {
+            // 创建一个新的测量项，并给一个默认名字
+            var newMeasurement = new MeasurementViewModel($"New Measurement {Measurements.Count + 1}");
+            Measurements.Add(newMeasurement);
         }
     }
 }

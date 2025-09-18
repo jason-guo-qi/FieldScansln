@@ -97,56 +97,28 @@
 
                         <TreeView.Resources>
                             <HierarchicalDataTemplate DataType="{x:Type viewmodels:ProjectViewModel}" 
-                              ItemsSource="{Binding Measurements}">
+                                                      ItemsSource="{Binding Measurements}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="Orange"/>
                                     <TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/>
+
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="新建测量项" Command="{Binding AddNewMeasurementCommand}"/>
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
 
                             <HierarchicalDataTemplate DataType="{x:Type viewmodels:MeasurementViewModel}"
-                          ItemsSource="{Binding Steps}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE7F8;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center" Margin="15,0,5,0" Foreground="DodgerBlue"/>
-
-                                    <Grid>
-                                        <TextBlock Text="{Binding DisplayName}">
-                                            <TextBlock.InputBindings>
-                                                <MouseBinding Gesture="MouseDoubleClick" Command="{Binding StartEditingCommand}"/>
-                                            </TextBlock.InputBindings>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-
-                                        <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"
-                     MinWidth="120"
-                     BorderThickness="1">
-
-                                            <TextBox.InputBindings>
-                                                <KeyBinding Key="Enter" Command="{Binding CommitEditCommand}" />
-                                            </TextBox.InputBindings>
-
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-                                    </Grid>
-                                </StackPanel>
+                                                      ItemsSource="{Binding Steps}">
+                                <TextBlock Text="{Binding DisplayName}">
+                                    <TextBlock.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="重命名" Command="{Binding RenameCommand}"/>
+                                        </ContextMenu>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                             </HierarchicalDataTemplate>
 
                             <DataTemplate DataType="{x:Type viewmodels:InstrumentSetupViewModel}">
