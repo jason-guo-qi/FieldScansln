@@ -23,12 +23,11 @@ namespace FieldScanNew.ViewModels
             {
                 new InstrumentSetupViewModel(ParentProject.ProjectData.InstrumentConfig),
                 new ProbeSetupViewModel(),
-                new ScanSettingsViewModel(),
-                new ZCalibViewModel(),
                 
-                // **核心修正：传入项目文件夹路径**
-                new XYCalibViewModel(ParentProject.ProjectData, ParentProject.ProjectFolderPath),
+                // **核心修正：传入 InstrumentConfig**
+                new ScanSettingsViewModel(ParentProject.ProjectData.InstrumentConfig),
 
+                new XYCalibViewModel(ParentProject.ProjectData, ParentProject.ProjectFolderPath),
                 new ScanAreaViewModel(ParentProject.ProjectData)
             };
         }

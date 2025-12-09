@@ -2,27 +2,32 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
+
+		<LangVersion>10.0</LangVersion>
 		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
+
+		<ImplicitUsings>disable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
+
 		<PlatformTarget>x86</PlatformTarget>
+
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
 		<PackageReference Include="AForge" Version="2.2.5" />
 		<PackageReference Include="AForge.Video" Version="2.2.5" />
 		<PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
-		<PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="ClassLibrary_ControlBean">
 			<HintPath>lib\ClassLibrary_ControlBean.dll</HintPath>
-		</Reference>
-		<Reference Include="ControlBeanExDll">
-			<HintPath>lib\ControlBeanExDll.dll</HintPath>
 		</Reference>
 		<Reference Include="Ivi.Visa">
 			<HintPath>lib\Ivi.Visa.dll</HintPath>
@@ -30,15 +35,13 @@
 		<Reference Include="Keysight.Visa">
 			<HintPath>lib\Keysight.Visa.dll</HintPath>
 		</Reference>
-		<Reference Include="share">
-			<HintPath>lib\share.dll</HintPath>
-		</Reference>
-		<Reference Include="small_scara_interface">
-			<HintPath>lib\small_scara_interface.dll</HintPath>
-		</Reference>
-		<Reference Include="TcpserverExDll">
-			<HintPath>lib\TcpserverExDll.dll</HintPath>
-		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="lib\*.*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>%(FileName)%(Extension)</Link>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>

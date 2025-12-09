@@ -1,17 +1,20 @@
 ﻿using FieldScanNew.Infrastructure;
 using FieldScanNew.Models;
 using System;
-using System.Windows;
+using System.Windows; // 引用 Point, Rect
 using System.Windows.Media.Imaging;
+
 using MessageBox = System.Windows.MessageBox;
 
 namespace FieldScanNew.ViewModels
 {
     public class ScanAreaViewModel : ViewModelBase, IStepViewModel
     {
-        public string DisplayName => "6. 扫描区域配置";
+        // **核心修正：改名为 "5. 扫描区域配置"**
+        public string DisplayName => "5. 扫描区域配置";
 
         private readonly ProjectData _projectData;
+
         public ScanSettings Settings
         {
             get => _projectData.ScanConfig;
@@ -34,10 +37,9 @@ namespace FieldScanNew.ViewModels
         public ScanAreaViewModel(ProjectData projectData)
         {
             _projectData = projectData;
-            ReloadImage(); // 初始化时加载
+            ReloadImage();
         }
 
-        // **核心修正：改为 Public 方法，允许外部强制刷新**
         public void ReloadImage()
         {
             if (!string.IsNullOrEmpty(_projectData.DutImagePath) && System.IO.File.Exists(_projectData.DutImagePath))
@@ -46,7 +48,7 @@ namespace FieldScanNew.ViewModels
                 {
                     var bitmap = new BitmapImage();
                     bitmap.BeginInit();
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad; // 关键：释放文件锁
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
                     bitmap.UriSource = new Uri(_projectData.DutImagePath);
                     bitmap.EndInit();
                     bitmap.Freeze();
@@ -57,7 +59,7 @@ namespace FieldScanNew.ViewModels
             else
             {
                 DutImageSource = null;
-                StatusText = "未找到校准图片，请先在“XY平面校准”中加载或拍摄图片。";
+                StatusText = "未找到校准图片，请先在“4. 机械臂校准”中加载或拍摄图片。";
             }
         }
 
@@ -65,33 +67,36 @@ namespace FieldScanNew.ViewModels
         {
             if (!_projectData.IsCalibrated)
             {
-                MessageBox.Show("系统尚未校准！\n请先完成“5. XY平面校准”，否则无法自动计算物理坐标。", "警告");
+                MessageBox.Show("系统尚未校准！\n请先完成“4. 机械臂校准”，否则无法自动计算物理坐标。", "警告");
                 return;
             }
 
-            double m11 = _projectData.MatrixM11;
-            double m12 = _projectData.MatrixM12;
-            double m21 = _projectData.MatrixM21;
-            double m22 = _projectData.MatrixM22;
+            // ================================================================
+            // **核心修正：使用独立缩放公式计算物理坐标**
+            // ================================================================
+            double scaleX = _projectData.MatrixM11;
+            double scaleY = _projectData.MatrixM22;
             double offX = _projectData.OffsetX;
             double offY = _projectData.OffsetY;
 
-            double x1 = rectPixel.X;
-            double y1 = rectPixel.Y;
-            double physX1 = (m11 * x1 + m12 * y1) + offX;
-            double physY1 = (m21 * x1 + m22 * y1) + offY;
+            // 计算矩形对角线两个点的物理坐标 (P1:左上, P2:右下)
+            // 注意：因为可能存在翻转，P1转换后不一定还是“左上”，可能是“右下”
 
-            double x2 = rectPixel.X + rectPixel.Width;
-            double y2 = rectPixel.Y + rectPixel.Height;
-            double physX2 = (m11 * x2 + m12 * y2) + offX;
-            double physY2 = (m21 * x2 + m22 * y2) + offY;
+            double physX_1 = (scaleX * rectPixel.X) + offX;
+            double physY_1 = (scaleY * rectPixel.Y) + offY;
 
-            Settings.StartX = (float)Math.Min(physX1, physX2);
-            Settings.StopX = (float)Math.Max(physX1, physX2);
-            Settings.StartY = (float)Math.Min(physY1, physY2);
-            Settings.StopY = (float)Math.Max(physY1, physY2);
+            double physX_2 = (scaleX * (rectPixel.X + rectPixel.Width)) + offX;
+            double physY_2 = (scaleY * (rectPixel.Y + rectPixel.Height)) + offY;
 
-            StatusText = $"区域已更新：X[{Settings.StartX:F1}, {Settings.StopX:F1}], Y[{Settings.StartY:F1}, {Settings.StopY:F1}]";
+            // 自动判断大小，填入 Start/Stop
+            // Start 总是放较小值，Stop 总是放较大值 (或者根据扫描习惯)
+            // 这里我们遵循：Start < Stop
+            Settings.StartX = (float)Math.Min(physX_1, physX_2);
+            Settings.StopX = (float)Math.Max(physX_1, physX_2);
+            Settings.StartY = (float)Math.Min(physY_1, physY_2);
+            Settings.StopY = (float)Math.Max(physY_1, physY_2);
+
+            StatusText = $"区域已更新：X[{Settings.StartX:F1} ~ {Settings.StopX:F1}], Y[{Settings.StartY:F1} ~ {Settings.StopY:F1}]";
         }
     }
 }

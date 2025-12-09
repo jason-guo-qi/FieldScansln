@@ -1,31 +1,27 @@
-﻿using FieldScanNew.ViewModels;
+﻿using FieldScanNew.Services; // 引用服务以便断开硬件
+using FieldScanNew.ViewModels;
+using System; // 引用 Environment
 using System.Windows;
 
-namespace FieldScanNew // 根命名空间
+namespace FieldScanNew
 {
-    // 在这里添加关键字 "partial" 来连接 XAML 和 C# 代码
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
-            InitializeComponent(); // 现在这个方法可以被正确找到了
-
-            // 使用正确的命名空间
-            this.DataContext = new FieldScanNew.ViewModels.MainViewModel();
-            // 添加这个事件处理器
+            InitializeComponent();
+            this.DataContext = new MainViewModel();
             TaskTreeView.SelectedItemChanged += TaskTreeView_SelectedItemChanged;
-
         }
+
         private void TaskTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            // 将选中的项手动设置到ViewModel的属性上
             if (this.DataContext is MainViewModel vm && e.NewValue is IStepViewModel step)
             {
                 vm.SelectedStep = step;
             }
         }
 
-        // 下面的方法现在可以被 XAML 正确找到了
         public void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
@@ -36,10 +32,33 @@ namespace FieldScanNew // 根命名空间
             this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         }
 
+        // **核心修正 1：点击关闭按钮时，调用 Close()**
         public void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        // **核心修正 2：重写 OnClosed 方法，强制退出整个应用程序**
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            // 1. 尝试优雅地断开硬件连接 (可选，但推荐)
+            try
+            {
+                HardwareService.Instance.ActiveRobot?.Disconnect();
+                HardwareService.Instance.ActiveDevice?.Disconnect();
+                // 如果有摄像头服务，最好也在这里停止，但在 ViewModel 里比较难拿，
+                // 直接用下面的 Environment.Exit(0) 强杀通常也没问题。
+            }
+            catch { }
+
+            // 2. 通知 WPF 应用退出
+            Application.Current.Shutdown();
+
+            // 3. 【最关键一步】强制终止所有线程（包括摄像头和后台通信线程）
+            // 这能确保进程彻底消失，不会再占用 exe 文件
+            Environment.Exit(0);
+        }
     }
 }

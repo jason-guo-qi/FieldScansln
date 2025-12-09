@@ -7,7 +7,7 @@ namespace FieldScanNew.Models
     // 继承自 ViewModelBase
     public class InstrumentSettings : ViewModelBase
     {
-        private string _ipAddress = "192.168.0.22";
+        private string _ipAddress = "192.168.1.51";
         public string IpAddress { get => _ipAddress; set { _ipAddress = value; OnPropertyChanged(); } }
 
         private int _port = 5025;

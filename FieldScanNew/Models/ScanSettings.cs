@@ -1,10 +1,7 @@
-﻿// Models/ScanSettings.cs
-// This file is used to store the scan settings.
-using FieldScanNew.Infrastructure;
+﻿using FieldScanNew.Infrastructure;
 
 namespace FieldScanNew.Models
 {
-    // 继承自 ViewModelBase 来获得通知功能
     public class ScanSettings : ViewModelBase
     {
         private float _startX;
@@ -27,5 +24,9 @@ namespace FieldScanNew.Models
 
         private float _scanHeightZ;
         public float ScanHeightZ { get => _scanHeightZ; set { _scanHeightZ = value; OnPropertyChanged(); } }
+
+        // **核心修正：新增 R 轴角度属性**
+        private float _scanAngleR;
+        public float ScanAngleR { get => _scanAngleR; set { _scanAngleR = value; OnPropertyChanged(); } }
     }
 }
